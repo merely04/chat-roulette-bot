@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+
+  #TODO Добавить prisma_studio
+
+  postgres:
+    volumes:
+      - "postgres-data:/data/postgres"
+    env_file:
+      - docker-compose.prod.postgres.env
+
+  bot:
+    env_file:
+      - docker-compose.prod.bot.env
+
+volumes:
+  postgres-data:

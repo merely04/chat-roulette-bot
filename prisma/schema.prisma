@@ -1,0 +1,64 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  OWNER
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  telegramId   BigInt     @unique @map("telegram_id")
+  languageCode String?    @map("language_code")
+  role         Role       @default(USER)
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  isSearching  Boolean    @default(false) @map("is_searching")
+  nodeId       Int?       @map("node_id")
+ node         Node?      @relation(fields: [nodeId], references: [id])
+  messages     Message[]
+  blacklist    Blacklist?
+
+  @@map(name: "users")
+}
+
+model Node {
+  id       Int       @id @default(autoincrement())
+  users    User[]
+  messages Message[]
+
+  @@map(name: "nodes")
+}
+
+model Message {
+  id       Int  @id @default(autoincrement())
+  nodeId   Int  @map("node_id")
+  node     Node @relation(fields: [nodeId], references: [id])
+  authorId Int  @map("author_id")
+  author   User @relation(fields: [authorId], references: [id])
+
+  @@map(name: "messages")
+}
+
+model Filter {
+  id   Int    @id @default(autoincrement())
+  text String @unique
+
+  @@map(name: "filters")
+}
+
+model Blacklist {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique @map("user_id")
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map(name: "blacklist")
+}

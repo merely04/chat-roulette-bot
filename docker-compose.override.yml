@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+
+  prisma-studio:
+    ports:
+      - "5555:5555"
+    restart: unless-stopped
+    env_file:
+      - docker-compose.dev.postgres.env
+    environment:
+      POSTGRES_URL: ${DATABASE_URL}
+
+
+  postgres:
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres-data-dev:/data/postgres"
+    env_file:
+      - docker-compose.dev.postgres.env
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  bot:
+    ports:
+      - "3000:80"
+    volumes:
+      - ".:/usr/src"
+    env_file:
+      - docker-compose.dev.bot.env
+    command: npm run dev
+
+volumes:
+  postgres-data-dev:

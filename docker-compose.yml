@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+
+  prisma-studio:
+    image: timothyjmiller/prisma-studio:latest
+
+  postgres:
+    image: postgres:15-alpine
+
+  redis:
+    image: redis:7-alpine
+
+  bot:
+    build:
+      context: .
+    depends_on:
+      - postgres
+      - redis
