@@ -2,6 +2,8 @@ import { Menu } from "@grammyjs/menu";
 import { Context } from "~/bot/types";
 import { logHandle } from "~/bot/helpers/logging";
 import { usersService } from "~/services";
+import { i18n } from "~/bot/i18n";
+import { mainKeyboard } from "~/bot/keyboards/index";
 
 export const keyboard = new Menu<Context>("search");
 
@@ -20,11 +22,41 @@ keyboard.back(
 
     const telegramId = Number(user.telegramId);
 
-    usersService.updateByTelegramId(telegramId, {
-      data: {
-        isSearching: false,
-      },
-    });
+    if (!user.isSearching) {
+      const companion = user.node?.users?.find((u) => u.id !== user.id);
+      if (!companion) {
+        return;
+      }
+      const companionTelegramId = companion.telegramId.toString();
+
+      await usersService.updateMany({
+        where: {
+          nodeId: user.nodeId,
+        },
+        data: {
+          nodeId: null,
+          isSearching: false,
+        },
+      });
+
+      const companionLanguage = companion.languageCode ?? "en";
+      const companionMessage = `
+${i18n.t(companionLanguage, "companion.finished")}. ${i18n.t(
+        companionLanguage,
+        "companion.left"
+      )}
+    `;
+
+      await ctx.api.sendMessage(companionTelegramId, companionMessage, {
+        reply_markup: mainKeyboard,
+      });
+    } else {
+      usersService.updateByTelegramId(telegramId, {
+        data: {
+          isSearching: false,
+        },
+      });
+    }
 
     await ctx.editMessageText(ctx.t("main.welcome"));
   }

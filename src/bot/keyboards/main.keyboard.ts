@@ -8,8 +8,7 @@ import {
   selectLanguageKeyboard,
   showStatisticsKeyboard,
 } from "~/bot/keyboards";
-import { messagesService, nodesService, usersService } from "~/services";
-import { logger } from "~/logger";
+import { nodesService, usersService } from "~/services";
 
 export const keyboard = new Menu<Context>("main");
 
@@ -38,98 +37,6 @@ keyboard
       await ctx.editMessageText(ctx.t("searching"), {
         reply_markup: searchKeyboard,
       });
-
-      const companion = await usersService.findFirst({
-        where: {
-          isSearching: true,
-          blacklist: undefined,
-          id: {
-            not: user.id,
-          },
-        },
-      });
-
-      if (!companion) {
-        return;
-      }
-
-      await usersService.updateMany({
-        where: {
-          id: {
-            in: [user.id, companion.id],
-          },
-        },
-        data: {
-          isSearching: false,
-        },
-      });
-
-      let node = await nodesService.findFirst({
-        where: {
-          users: {
-            some: {
-              id: {
-                in: [user.id, companion.id],
-              },
-            },
-          },
-        },
-        include: {
-          users: true,
-        },
-      });
-      if (!node) {
-        node = await nodesService.create({
-          data: {
-            users: {
-              connect: [{ id: user.id }, { id: companion.id }],
-            },
-          },
-          include: {
-            users: true,
-          },
-        });
-
-        if (node.users.length > 2) {
-          return;
-        }
-      }
-
-      await usersService.updateMany({
-        where: {
-          id: {
-            in: [user.id, companion.id],
-          },
-        },
-        data: {
-          nodeId: node.id,
-        },
-      });
-
-      await ctx.editMessageText(
-        `${ctx.t("companion.founded")} - <code>${companion.telegramId}</code>`,
-        {
-          reply_markup: nodeKeyboard,
-        }
-      );
-
-      const beforeLanguageCode = user.languageCode ?? "en";
-      if (
-        companion.languageCode &&
-        companion.languageCode !== beforeLanguageCode
-      ) {
-        ctx.i18n.useLocale(companion.languageCode.toString());
-      }
-
-      await ctx.api.sendMessage(
-        companion.telegramId.toString(),
-        `${ctx.t("companion.founded")} - <code>${user.telegramId}</code>`,
-        {
-          reply_markup: nodeKeyboard,
-        }
-      );
-
-      ctx.i18n.useLocale(beforeLanguageCode);
     }
   )
   .row();

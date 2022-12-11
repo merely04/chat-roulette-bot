@@ -2,7 +2,8 @@ import { Context } from "~/bot/types";
 import { Menu } from "@grammyjs/menu";
 import { logHandle } from "~/bot/helpers/logging";
 import { mainKeyboard } from "~/bot/keyboards/index";
-import { nodesService, usersService } from "~/services";
+import { usersService } from "~/services";
+import { i18n } from "~/bot/i18n";
 
 export const keyboard = new Menu<Context>("node");
 
@@ -20,18 +21,6 @@ keyboard.text(
       return;
     }
 
-    // const node = await nodesService.findFirst({
-    //   where: {
-    //     id: user.nodeId,
-    //   },
-    //   include: {
-    //     users: true,
-    //   },
-    // });
-    // if (!node) {
-    //   return;
-    // }
-
     const companion = user.node.users?.find((u) => u.id !== user.id);
     if (!companion) {
       return;
@@ -47,23 +36,17 @@ keyboard.text(
       },
     });
 
-    const beforeLanguageCode = user.languageCode ?? "en";
-    if (
-      companion.languageCode &&
-      companion.languageCode !== beforeLanguageCode
-    ) {
-      ctx.i18n.useLocale(companion.languageCode.toString());
-    }
+    const companionLanguage = companion.languageCode ?? "en";
+    const companionMessage = `
+${i18n.t(companionLanguage, "companion.finished")}. ${i18n.t(
+      companionLanguage,
+      "companion.left"
+    )}
+    `;
 
-    await ctx.api.sendMessage(
-      companionTelegramId,
-      `${ctx.t("companion.finished")}. ${ctx.t("companion.left")}`,
-      {
-        reply_markup: mainKeyboard,
-      }
-    );
-
-    ctx.i18n.useLocale(beforeLanguageCode);
+    await ctx.api.sendMessage(companionTelegramId, companionMessage, {
+      reply_markup: mainKeyboard,
+    });
 
     await ctx.reply(ctx.t("companion.finished"), {
       reply_markup: mainKeyboard,

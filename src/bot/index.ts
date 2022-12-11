@@ -3,10 +3,8 @@ import { limit as rateLimit } from "@grammyjs/ratelimiter";
 import { apiThrottler } from "@grammyjs/transformer-throttler";
 import { hydrateReply, parseMode } from "@grammyjs/parse-mode";
 import { hydrate } from "@grammyjs/hydrate";
-
 import { Context } from "~/bot/types";
 import { config } from "~/config";
-
 import {
   updatesLogger,
   setupSession,
@@ -19,8 +17,11 @@ import {
 import { apiCallsLogger } from "~/bot/transformers";
 import { botAdminFeature, welcomeFeature } from "~/bot/features";
 import { handleError } from "~/bot/helpers/error-handler";
+import { createSearchJob } from "~/bot/jobs";
 
 export const bot = new Bot<Context>(config.BOT_TOKEN);
+
+const searchJob = createSearchJob(bot);
 
 // Middlewares
 
@@ -41,6 +42,10 @@ bot.use(setupLocalContext());
 bot.use(setupLogger());
 bot.use(setupI18n());
 bot.use(setUser());
+
+// Jobs
+
+searchJob.start();
 
 // Handlers
 
