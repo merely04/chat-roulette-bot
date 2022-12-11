@@ -128,8 +128,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# IDEA
-.idea
-
 # Data
 data/
