@@ -10,7 +10,6 @@ keyboard.back(
   },
   logHandle("handle statistics"),
   async (ctx) => {
-    await ctx.replyWithChatAction("typing");
     await ctx.editMessageText(ctx.t("main.welcome"));
   }
 );

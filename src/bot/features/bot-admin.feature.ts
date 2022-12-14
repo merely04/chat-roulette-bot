@@ -96,8 +96,6 @@ featureForOwner.command("admin", logHandle("handle /admin"), async (ctx) => {
 });
 
 feature.command("stats", logHandle("handle /stats"), async (ctx) => {
-  await ctx.replyWithChatAction("typing");
-
   const usersCount = await usersService.count();
 
   const message = `Users count: ${usersCount}`;
@@ -105,8 +103,6 @@ feature.command("stats", logHandle("handle /stats"), async (ctx) => {
 });
 
 feature.command("filter", logHandle("handle /filter"), async (ctx) => {
-  await ctx.replyWithChatAction("typing");
-
   const filters = await filtersService.findMany();
 
   const filterWords = ctx.match.trim().toLowerCase();
@@ -144,8 +140,6 @@ feature.command(
   "setcommands",
   logHandle("handle /setcommands"),
   async (ctx) => {
-    await ctx.replyWithChatAction("typing");
-
     // set private chat commands
     await ctx.api.setMyCommands(
       getPrivateChatCommands({

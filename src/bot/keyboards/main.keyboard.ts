@@ -20,8 +20,6 @@ keyboard
     },
     logHandle("handle /search"),
     async (ctx) => {
-      await ctx.replyWithChatAction("typing");
-
       const { user } = ctx.local;
       if (!user || user.blacklist) {
         return ctx.reply(ctx.t("blocked"));
@@ -50,8 +48,6 @@ keyboard
     "statistics",
     logHandle("handle show statistics"),
     async (ctx) => {
-      await ctx.replyWithChatAction("typing");
-
       const { user } = ctx.local;
       if (!user) {
         return;
@@ -88,7 +84,6 @@ if (isMultipleLocales) {
       "language",
       logHandle("handle change language"),
       async (ctx) => {
-        await ctx.replyWithChatAction("typing");
         await ctx.editMessageText(ctx.t("language.select"));
       }
     )

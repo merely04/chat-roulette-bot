@@ -4,6 +4,7 @@ import { mainKeyboard, nodeKeyboard } from "~/bot/keyboards";
 import { logHandle } from "~/bot/helpers/logging";
 import { filtersService, messagesService } from "~/services";
 import { replaceFilterWords } from "~/bot/lib";
+import { i18n } from "~/bot/i18n";
 
 export const composer = new Composer<Context>();
 
@@ -13,7 +14,6 @@ feature.use(nodeKeyboard);
 feature.use(mainKeyboard);
 
 feature.command("start", logHandle("handle /start"), async (ctx) => {
-  await ctx.replyWithChatAction("typing");
   await ctx.reply(ctx.t("main.welcome"), {
     reply_markup: mainKeyboard,
   });
@@ -51,22 +51,14 @@ feature.on("message", logHandle("handle new message"), async (ctx) => {
     },
   });
 
-  const beforeLanguageCode = user.languageCode ?? "en";
-  if (companion.languageCode && companion.languageCode !== beforeLanguageCode) {
-    ctx.i18n.useLocale(companion.languageCode.toString());
-  }
-
-  await ctx.api.sendMessage(
-    companionTelegramId,
-    `
-${ctx.t("companion.from", {})}: <code>${companionTelegramId}</code>
+  const companionLanguage = companion.languageCode ?? "en";
+  const companionMessage = `
+${i18n.t(companionLanguage, "companion.from")}: <code>${user.telegramId}</code>
 
 ${text}
-  `,
-    {
-      reply_markup: nodeKeyboard,
-    }
-  );
+    `;
 
-  ctx.i18n.useLocale(beforeLanguageCode);
+  await ctx.api.sendMessage(companionTelegramId, companionMessage, {
+    reply_markup: nodeKeyboard,
+  });
 });

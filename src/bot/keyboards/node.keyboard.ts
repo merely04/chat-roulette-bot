@@ -14,8 +14,6 @@ keyboard.text(
   },
   logHandle("handle disconnect node"),
   async (ctx) => {
-    await ctx.replyWithChatAction("typing");
-
     const { user } = ctx.local;
     if (!user || !user.node) {
       return;

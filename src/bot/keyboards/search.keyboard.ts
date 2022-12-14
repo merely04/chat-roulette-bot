@@ -13,8 +13,6 @@ keyboard.back(
   },
   logHandle("handle cancel search"),
   async (ctx) => {
-    await ctx.replyWithChatAction("typing");
-
     const { user } = ctx.local;
     if (!user) {
       return ctx.reply("User is empty");
